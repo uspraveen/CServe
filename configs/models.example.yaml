@@ -26,7 +26,7 @@ models:
     min_tp: 4
     node_type_required: "l40"
     node_types_allowed: ["l40"]
-    nodes_allowed: ["cosmos-11", "cosmos-12"]
+    nodes_allowed: ["cosmos-10", "cosmos-11", "cosmos-12", "cosmos-13"]
     gpu_guard_exempt: true
     engine:
       max_model_len: 102400
@@ -37,7 +37,7 @@ models:
       dtype: "auto"
     autoscaling:
       min_replicas: 2
-      max_replicas: 2
+      max_replicas: 6
       allow_scale_to_zero: false
       target_inflight: 10
       max_queue_wait_ms: 300000
