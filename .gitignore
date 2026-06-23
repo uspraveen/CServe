@@ -17,6 +17,7 @@ env/
 
 *.log
 
+# Local secrets — copy .env.example to .env (never commit .env)
 .env
 .env.*
 
@@ -37,7 +38,3 @@ cserve/common/node_agent_pb2_grpc.py
 # OS
 .DS_Store
 Thumbs.db
-
-# Live cluster configs (secrets) — commit *.example.yaml instead
-configs/cluster.yaml
-configs/models.yaml

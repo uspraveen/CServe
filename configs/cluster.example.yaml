@@ -82,4 +82,4 @@ ssh:
   cserve_src: ~/CServe
   python_path: ~/miniconda3/bin/python3
   pip_path: ~/miniconda3/bin/pip
-  # password: optional — prefer SSH keys; never commit real passwords
+  # password: optional — set CSERVE_SSH_PASSWORD in .env

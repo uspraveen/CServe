@@ -21,6 +21,7 @@ StandardOutput=journal
 StandardError=journal
 Environment=PATH=/home/services/cserve-venv/bin:/usr/local/bin:/usr/bin:/bin
 Environment=HOME=/home/services
+EnvironmentFile=-/home/services/CServe/.env
 
 [Install]
 WantedBy=multi-user.target

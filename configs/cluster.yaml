@@ -1,0 +1,71 @@
+cluster:
+  head:
+    name: cosmos-9
+    host: cosmos-9.ddns.ualr.edu
+    node_ip: 144.167.35.146
+  nodes:
+  - name: cosmos-7
+    host: 144.167.35.154
+    gpu_count: 8
+    gpu_type: a40
+    cuda_devices: 0,1,2,3,4,5,6,7
+    schedulable: true
+    labels:
+      rack: A
+  - name: cosmos-8
+    host: cosmos-8.ddns.ualr.edu
+    gpu_count: 8
+    gpu_type: a40
+    cuda_devices: 0,1,2,3,4,5,6,7
+    labels:
+      rack: A
+  - name: cosmos-10
+    host: cosmos-10.ddns.ualr.edu
+    gpu_count: 4
+    gpu_type: l40
+    cuda_devices: 0,1,2,3
+    schedulable: true
+  - name: cosmos-11
+    host: cosmos-11.ddns.ualr.edu
+    gpu_count: 4
+    gpu_type: l40
+    cuda_devices: 0,1,2,3
+  - name: cosmos-12
+    host: cosmos-12.ddns.ualr.edu
+    gpu_count: 4
+    gpu_type: l40
+    cuda_devices: 0,1,2,3
+  - name: cosmos-13
+    host: cosmos-13.ddns.ualr.edu
+    gpu_count: 4
+    gpu_type: l40
+    cuda_devices: 0,1,2,3
+gateway:
+  host: 0.0.0.0
+  port: 8002
+node_agent:
+  port: 50051
+  heartbeat_interval_s: 10
+redis:
+  host: 127.0.0.1
+  port: 6379
+  db: 0
+safety:
+  gpu_memory_limit: 0.79
+  gpu_warn_threshold: 0.70
+  gpu_danger_threshold: 0.79
+  gpu_danger_consecutive_checks: 2
+  gpu_compute_sustain_threshold: 0.99
+  gpu_compute_sustain_duration_s: 900   # 15m — tolerate vLLM startup load before sustain breach
+  guard_mitigation_window_s: 600
+  guard_check_interval_s: 20
+  guard_consecutive_breaches: 2
+ssh:
+  username: praveen
+  key_path: ~/.ssh/id_ed25519
+  port: 22
+  timeout_s: 30.0
+  cserve_src: ~/CServe
+  python_path: ~/miniconda3/bin/python3
+  pip_path: ~/miniconda3/bin/pip
+  # password: optional — set CSERVE_SSH_PASSWORD in .env (not committed)

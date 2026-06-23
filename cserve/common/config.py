@@ -9,11 +9,14 @@ fields that affect GPU allocation or model loading.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
 import yaml
 from pydantic import ValidationError
+
+from .config_secrets import apply_cluster_secret_env, apply_models_secret_env
 
 from .models import (
     AutoscalePolicy,
@@ -50,8 +53,12 @@ def _load_yaml(path: str | Path) -> dict[str, Any]:
 # ─── Cluster config ──────────────────────────────────────────────────────
 
 def load_cluster_config(path: str | Path) -> ClusterConfig:
-    """Load and validate cluster.yaml."""
-    raw = _load_yaml(path)
+    """Load and validate cluster.yaml.
+
+    Secrets (``ssh.password``, ``redis.password``) come from ``${CSERVE_SSH_PASSWORD}``
+    / ``${REDIS_PASSWORD}`` placeholders or those environment variables at runtime.
+    """
+    raw = apply_cluster_secret_env(_load_yaml(path))
 
     cluster_block = raw.get("cluster")
     if not cluster_block or not isinstance(cluster_block, dict):
@@ -129,8 +136,7 @@ def save_cluster_config(cluster_cfg: ClusterConfig, path: str | Path) -> None:
         "python_path": cluster_cfg.ssh.python_path,
         "pip_path": cluster_cfg.ssh.pip_path,
     }
-    if cluster_cfg.ssh.password:
-        ssh_block["password"] = cluster_cfg.ssh.password
+    # Never persist passwords — use CSERVE_SSH_PASSWORD in the environment.
     raw["ssh"] = ssh_block
 
     raw["safety"] = cluster_cfg.safety.model_dump()
@@ -181,8 +187,10 @@ def load_models_config(path: str | Path) -> tuple[GlobalConfig, dict[str, ModelC
 
     Returns (global_config, {model_key: ModelConfig}).
     Global defaults are merged into each model's engine config.
+
+    ``global.env.HF_TOKEN`` uses ``${HF_TOKEN}`` in YAML or the ``HF_TOKEN`` env var.
     """
-    raw = _load_yaml(path)
+    raw = apply_models_secret_env(_load_yaml(path))
 
     global_raw = raw.get("global") or {}
     global_cfg = GlobalConfig(

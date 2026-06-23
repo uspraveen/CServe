@@ -1,4 +1,4 @@
-# Model catalog — secrets via environment (see .env.example).
+# Restored after accidental truncation — verify models/autoscaling match your cluster.
 global:
   env:
     HF_TOKEN: ${HF_TOKEN}
