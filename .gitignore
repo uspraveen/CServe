@@ -19,7 +19,8 @@ env/
 
 # Local secrets — copy .env.example to .env (never commit .env)
 .env
-.env.*
+.env.local
+!.env.example
 
 node_modules/
 dashboard-ui/dist/
