@@ -1,0 +1,28 @@
+[Unit]
+Description=CServe Node Agent — GPU Worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=praveen
+Group=praveen
+WorkingDirectory=/home/praveen/CServe
+ExecStart=/home/praveen/miniconda3/bin/python3 -m cserve.node_agent.server \
+    --node-name NODE_NAME_PLACEHOLDER \
+    --node-host NODE_HOST_PLACEHOLDER \
+    --control-plane http://cosmos-9.ddns.ualr.edu:8002 \
+    --port 50051 \
+    --transport http
+KillMode=process
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+# vLLM loads many model shards — avoid [Errno 24] Too many open files
+LimitNOFILE=65535
+Environment=PATH=/home/praveen/miniconda3/bin:/usr/local/bin:/usr/bin:/bin
+Environment=CSERVE_CUDA_DEVICES=CUDA_DEVICES_PLACEHOLDER
+
+[Install]
+WantedBy=multi-user.target

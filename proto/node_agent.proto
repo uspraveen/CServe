@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package cserve;
+
+// ---------------------------------------------------------------------------
+// NodeAgent — the single gRPC service running on every GPU worker node.
+//
+// The control plane calls these RPCs to manage vLLM replicas and query
+// hardware state.  The agent is intentionally thin: it starts/stops
+// processes and reads nvidia-smi.  All scheduling and autoscaling
+// decisions are made by the control plane.
+// ---------------------------------------------------------------------------
+
+service NodeAgent {
+  // ── Lifecycle ──────────────────────────────────────────────────────────
+  rpc LaunchReplica (LaunchReplicaRequest)  returns (LaunchReplicaResponse);
+  rpc StopReplica   (StopReplicaRequest)    returns (StopReplicaResponse);
+  rpc DrainReplica  (DrainReplicaRequest)   returns (DrainReplicaResponse);
+
+  // ── Health & Metrics ───────────────────────────────────────────────────
+  rpc Ping          (PingRequest)           returns (PingResponse);
+  rpc GetNodeStatus (NodeStatusRequest)     returns (NodeStatusResponse);
+  rpc GetReplicaStatus (ReplicaStatusRequest) returns (ReplicaStatusResponse);
+
+  // ── Maintenance ────────────────────────────────────────────────────────
+  rpc KillGpuProcesses (KillGpuProcessesRequest) returns (KillGpuProcessesResponse);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Lifecycle messages
+// ═══════════════════════════════════════════════════════════════════════════
+
+message LaunchReplicaRequest {
+  string replica_id        = 1;
+  string model_name        = 2;
+  string served_model_name = 3;
+  string hf_model          = 4;
+  string variant           = 5;
+  int32  tp_size           = 6;   // tensor parallelism degree
+  repeated int32 gpu_ids   = 7;   // physical GPU indices to pin
+  int32  port              = 8;   // port for vLLM HTTP server (0 = auto-assign)
+  map<string, string> engine_args = 9;   // extra vLLM CLI flags
+  map<string, string> env_vars    = 10;  // extra env vars (HF_TOKEN, etc.)
+}
+
+message LaunchReplicaResponse {
+  bool   ok              = 1;
+  string error           = 2;   // empty on success
+  string replica_id      = 3;
+  string http_endpoint   = 4;   // e.g. "http://10.0.1.5:8100"
+  int32  pid             = 5;
+}
+
+message StopReplicaRequest {
+  string replica_id      = 1;
+  bool   force           = 2;   // skip graceful shutdown
+}
+
+message StopReplicaResponse {
+  bool   ok              = 1;
+  string error           = 2;
+}
+
+message DrainReplicaRequest {
+  string replica_id      = 1;
+  int32  timeout_s       = 2;   // max seconds to wait for in-flight requests
+}
+
+message DrainReplicaResponse {
+  bool   ok              = 1;
+  string error           = 2;
+  int32  drained_requests = 3;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Health & Metrics messages
+// ═══════════════════════════════════════════════════════════════════════════
+
+message PingRequest {}
+
+message PingResponse {
+  string node_name       = 1;
+  string hostname        = 2;
+  double uptime_s        = 3;
+}
+
+message NodeStatusRequest {}
+
+message NodeStatusResponse {
+  string node_name             = 1;
+  repeated GpuInfo gpus        = 2;
+  repeated ReplicaInfo replicas = 3;
+  double  uptime_s             = 4;
+  double  load_avg_1m          = 5;
+  int64   ram_used_mb          = 6;
+  int64   ram_total_mb         = 7;
+}
+
+message GpuInfo {
+  int32  index           = 1;
+  string uuid            = 2;
+  string name            = 3;   // e.g. "NVIDIA A40"
+  int64  memory_used_mb  = 4;
+  int64  memory_total_mb = 5;
+  float  utilization_pct = 6;   // 0.0 – 100.0
+  float  temperature_c   = 7;
+  string state           = 8;   // "FREE", "ALLOCATED", "RESERVED", "FAILED"
+  string allocated_replica_id = 9;  // empty if free
+}
+
+message ReplicaInfo {
+  string replica_id      = 1;
+  string model_name      = 2;
+  string variant         = 3;
+  repeated int32 gpu_ids = 4;
+  int32  port            = 5;
+  int32  pid             = 6;
+  string status          = 7;   // "STARTING", "READY", "DRAINING", "STOPPING", "FAILED"
+  bool   health_ok       = 8;   // last /health check result
+  double uptime_s        = 9;
+}
+
+message ReplicaStatusRequest {
+  string replica_id      = 1;
+}
+
+message ReplicaStatusResponse {
+  ReplicaInfo replica    = 1;
+  map<string, double> vllm_metrics = 2;  // scraped from /metrics
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Maintenance messages
+// ═══════════════════════════════════════════════════════════════════════════
+
+message KillGpuProcessesRequest {
+  repeated int32 gpu_ids = 1;
+  bool   vllm_only       = 2;   // only kill vLLM-related processes
+}
+
+message KillGpuProcessesResponse {
+  bool   ok              = 1;
+  string error           = 2;
+  repeated int32 killed_pids = 3;
+}

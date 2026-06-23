@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Light theme (default :root) — white + green */
+:root {
+  --cs-bg: #ffffff;
+  --cs-surface: #f6f8f7;
+  --cs-card: #ffffff;
+  --cs-border: #e5e7eb;
+  --cs-border2: #d1d5db;
+  --cs-accent: #3ecf8e;
+  --cs-accent2: #6c63ff;
+  --cs-warn: #d97706;
+  --cs-danger: #dc2626;
+  --cs-text: #111827;
+  --cs-muted: #6b7280;
+  --cs-dim: #9ca3af;
+  --cs-inset: rgba(0, 0, 0, 0.04);
+  --cs-hover: rgba(0, 0, 0, 0.04);
+  --cs-scrollbar: #d1d5db;
+  --cs-scrollbar-hover: #9ca3af;
+  --cs-selection-bg: rgba(62, 207, 142, 0.25);
+  --cs-selection-text: #111827;
+  --cs-shadow-glow: 0 0 20px rgba(62, 207, 142, 0.12);
+  --cs-shadow-glow-sm: 0 0 10px rgba(62, 207, 142, 0.08);
+  --cs-shadow-glow-accent: 0 0 30px rgba(62, 207, 142, 0.18);
+  --cs-shadow-inner: inset 0 1px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Dark theme — black + green (existing look) */
+.dark {
+  --cs-bg: #030303;
+  --cs-surface: #0a0a0a;
+  --cs-card: #111111;
+  --cs-border: #1a1a1a;
+  --cs-border2: #252525;
+  --cs-accent: #3ecf8e;
+  --cs-accent2: #6c63ff;
+  --cs-warn: #f5a623;
+  --cs-danger: #f24e4e;
+  --cs-text: #ededed;
+  --cs-muted: #666666;
+  --cs-dim: #444444;
+  --cs-inset: rgba(0, 0, 0, 0.35);
+  --cs-hover: rgba(255, 255, 255, 0.03);
+  --cs-scrollbar: #1a1a1a;
+  --cs-scrollbar-hover: #252525;
+  --cs-selection-bg: rgba(62, 207, 142, 0.2);
+  --cs-selection-text: #ededed;
+  --cs-shadow-glow: 0 0 20px rgba(62, 207, 142, 0.15);
+  --cs-shadow-glow-sm: 0 0 10px rgba(62, 207, 142, 0.1);
+  --cs-shadow-glow-accent: 0 0 30px rgba(62, 207, 142, 0.2);
+  --cs-shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+@layer base {
+  * {
+    border-color: theme("colors.cs.border");
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--cs-scrollbar);
+    border-radius: 100px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--cs-scrollbar-hover);
+  }
+
+  ::selection {
+    background: var(--cs-selection-bg);
+    color: var(--cs-selection-text);
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-cs-card border border-cs-border rounded-xl shadow-inner-glow;
+  }
+  .card-hover {
+    @apply card transition-all duration-200 hover:border-cs-border2 hover:shadow-glow-sm;
+  }
+  .badge {
+    @apply text-[10px] font-semibold px-2 py-0.5 rounded-full tracking-wide uppercase;
+  }
+  .kpi-card {
+    @apply card px-5 py-4 relative overflow-hidden;
+  }
+  .table-head {
+    @apply text-left px-4 py-2.5 text-[10px] text-cs-dim font-semibold uppercase tracking-widest;
+  }
+  .table-cell {
+    @apply px-4 py-2.5 text-xs;
+  }
+  .table-row {
+    @apply border-b border-cs-border transition-colors hover:bg-cs-hover;
+    border-bottom-color: color-mix(in srgb, var(--cs-border) 50%, transparent);
+  }
+  .section-title {
+    @apply text-[11px] font-semibold text-cs-dim uppercase tracking-[0.15em] mb-3;
+  }
+  .log-panel {
+    @apply bg-cs-inset border border-cs-border rounded-lg;
+    border-color: color-mix(in srgb, var(--cs-border) 60%, transparent);
+  }
+}

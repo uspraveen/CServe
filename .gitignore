@@ -1,0 +1,43 @@
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+.venv/
+venv/
+env/
+
+*.db
+*.sqlite
+*.sqlite3
+
+*.log
+
+.env
+.env.*
+
+node_modules/
+dashboard-ui/dist/
+
+# gRPC generated
+cserve/common/node_agent_pb2.py
+cserve/common/node_agent_pb2_grpc.py
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Live cluster configs (secrets) — commit *.example.yaml instead
+configs/cluster.yaml
+configs/models.yaml

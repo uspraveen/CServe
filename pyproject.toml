@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cserve"
+version = "0.1.0"
+description = "LLM Inference Cluster Orchestration — Ray-free, vLLM-native, autoscaling-first."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.34,<1",
+    "httpx>=0.28,<1",
+    "pydantic>=2.10,<3",
+    "pyyaml>=6.0,<7",
+    "redis>=5.2,<8",
+    "grpcio>=1.68,<2",
+    "grpcio-tools>=1.68,<2",
+    "prometheus-client>=0.21,<1",
+    "aiosqlite>=0.20,<1",
+    "websockets>=13,<15",
+    "asyncssh>=2.14,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+]
+
+[project.scripts]
+cserve-control = "cserve.control_plane.server:main"
+cserve-agent = "cserve.node_agent.server:main"
+cserve-ctl = "cserve.cli.ctl:main"
+
+[tool.setuptools.packages.find]
+include = ["cserve*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"cserve/generated/*" = ["E", "F", "W", "I", "N", "UP"]
+"cserve/node_agent/grpc_server.py" = ["N802"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

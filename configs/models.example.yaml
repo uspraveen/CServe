@@ -1,0 +1,153 @@
+# Copy to configs/models.yaml and set HF_TOKEN (or export HF_TOKEN in the environment).
+global:
+  env:
+    HF_TOKEN: ""
+    CUDA_LAUNCH_BLOCKING: "0"
+    TORCH_CUDA_ALLOC_CONF: "expandable_segments:True"
+    NCCL_P2P_DISABLE: "0"
+    NCCL_IB_DISABLE: "1"
+    NCCL_ASYNC_ERROR_HANDLING: "1"
+    NCCL_DEBUG: "INFO"
+  defaults:
+    max_model_len: 112640
+    max_num_seqs: 64
+    gpu_memory_utilization: 0.70
+    dtype: "auto"
+    trust_remote_code: true
+  serve:
+    max_ongoing_requests: 10
+    max_queued_requests: 2048
+
+models:
+  gemma4-31b:
+    deploy_priority: 10
+    served_model_name: "gemma4-31b"
+    hf_model: "google/gemma-4-31B-it"
+    min_tp: 4
+    node_type_required: "l40"
+    node_types_allowed: ["l40"]
+    nodes_allowed: ["cosmos-11", "cosmos-12"]
+    gpu_guard_exempt: true
+    engine:
+      max_model_len: 102400
+      max_num_seqs: 24
+      gpu_memory_utilization: 0.72
+      kv_cache_dtype: "fp8"
+      trust_remote_code: true
+      dtype: "auto"
+    autoscaling:
+      min_replicas: 2
+      max_replicas: 2
+      allow_scale_to_zero: false
+      target_inflight: 10
+      max_queue_wait_ms: 300000
+      upscale_delay_s: 15
+      downscale_delay_s: 120
+      downscale_to_zero_delay_s: 1800
+      replica_startup_timeout_s: 1200
+
+  gpt-oss-120b:
+    deploy_priority: 20
+    served_model_name: "gpt-oss-120b"
+    hf_model: "openai/gpt-oss-120b"
+    min_tp: 4
+    node_type_required: "l40"
+    node_types_allowed: ["l40"]
+    gpu_guard_exempt: true
+    engine:
+      max_model_len: 81920
+      max_num_seqs: 12
+      gpu_memory_utilization: 0.90
+    autoscaling:
+      min_replicas: 1
+      max_replicas: 2
+      allow_scale_to_zero: false
+      target_inflight: 6
+      max_queue_wait_ms: 300000
+      replica_startup_timeout_s: 1800
+      upscale_delay_s: 15
+      downscale_delay_s: 120
+      downscale_to_zero_delay_s: 3600
+
+  gemma3-27b:
+    deploy_priority: 30
+    served_model_name: "gemma3-27b"
+    hf_model: "google/gemma-3-27b-it"
+    min_tp: 2
+    node_types_allowed: ["a40", "l40"]
+    engine:
+      max_model_len: 112640
+      max_num_seqs: 8
+      disable_custom_all_reduce: true
+      trust_remote_code: true
+      dtype: "auto"
+    autoscaling:
+      min_replicas: 0
+      max_replicas: 0
+      target_ongoing_requests: 2
+      upscale_delay_s: 10
+      downscale_delay_s: 120
+      downscale_to_zero_delay_s: 1800
+
+  qwen3-vl-32b:
+    deploy_priority: 31
+    served_model_name: "qwen3-vl-32b"
+    hf_model: "Qwen/Qwen3-VL-30B-A3B-Instruct"
+    min_tp: 4
+    node_types_allowed: ["a40", "l40"]
+    nodes_allowed: ["cosmos-8"]
+    gpu_guard_exempt: true
+    engine:
+      max_model_len: 61440
+      max_num_seqs: 12
+      enable_chunked_prefill: true
+      gpu_memory_utilization: 0.90
+    autoscaling:
+      min_replicas: 1
+      max_replicas: 1
+      allow_scale_to_zero: false
+      target_inflight: 6
+      max_queue_wait_ms: 300000
+      replica_startup_timeout_s: 1800
+      upscale_delay_s: 15
+      downscale_delay_s: 120
+      downscale_to_zero_delay_s: 3600
+
+  whisper-large-v3:
+    deploy_priority: 90
+    served_model_name: "whisper-large-v3"
+    hf_model: "openai/whisper-large-v3"
+    min_tp: 1
+    node_type_required: "a40"
+    engine:
+      max_num_seqs: 8
+    autoscaling:
+      min_replicas: 0
+      max_replicas: 4
+      target_ongoing_requests: 6
+      upscale_delay_s: 15
+      downscale_delay_s: 120
+      downscale_to_zero_delay_s: 300
+
+  qwen3-embedding-8b:
+    deploy_priority: 5
+    served_model_name: "qwen3-embedding-8b"
+    hf_model: "Qwen/Qwen3-Embedding-8B"
+    min_tp: 2
+    node_type_required: "a40"
+    node_types_allowed: ["a40"]
+    nodes_allowed: ["cosmos-8"]
+    engine:
+      runner: pooling
+      convert: embed
+      max_model_len: 32768
+      dtype: "bfloat16"
+      gpu_memory_utilization: 0.70
+    autoscaling:
+      min_replicas: 1
+      max_replicas: 1
+      target_inflight: 5
+      max_queue_wait_ms: 300000
+      upscale_delay_s: 10
+      downscale_delay_s: 120
+      downscale_to_zero_delay_s: 1800

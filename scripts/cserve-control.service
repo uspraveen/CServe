@@ -1,0 +1,26 @@
+[Unit]
+Description=CServe Control Plane — LLM Inference Orchestration
+After=network-online.target redis.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=services
+Group=services
+WorkingDirectory=/home/services/CServe
+ExecStart=/home/services/cserve-venv/bin/python3 -m cserve.control_plane.server \
+    --cluster-config /home/services/CServe/configs/cluster.yaml \
+    --models-config /home/services/CServe/configs/models.yaml \
+    --db-path /var/lib/cserve/events.db \
+    --port 8002
+Restart=on-failure
+RestartSec=5
+# Many dashboard WS clients + parallel httpx calls to node agents; default 1024 causes EMFILE.
+LimitNOFILE=1048576
+StandardOutput=journal
+StandardError=journal
+Environment=PATH=/home/services/cserve-venv/bin:/usr/local/bin:/usr/bin:/bin
+Environment=HOME=/home/services
+
+[Install]
+WantedBy=multi-user.target
